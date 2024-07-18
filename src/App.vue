@@ -40,7 +40,14 @@
       <input v-model="doctor.nombre" placeholder="Nombre" required />
       <input v-model="doctor.apellido" placeholder="Apellido" required />
       <input v-model="doctor.especialidad" placeholder="Especialidad" required />
+      <input v-model="doctor.telefono" placeholder="Teléfono" required />
+      <input v-model="doctor.email" placeholder="Email" required />
+      <input v-model="doctor.direccion_Consultorio" placeholder="Dirección Consultorio" required />
       <input v-model="doctor.ciudad" placeholder="Ciudad" required />
+      <input v-model="doctor.nacimiento" type="date" placeholder="Fecha de Nacimiento" required />
+      <input v-model="doctor.genero" placeholder="Género" required />
+      <input v-model="doctor.password" type="password" placeholder="Contraseña" required />
+      <input v-model="doctor.Número_de_matriculaMedica" placeholder="Número de Matrícula Médica" required />
       <button type="submit">{{ doctorEditando ? 'Actualizar' : 'Agregar' }}</button>
       <button type="button" @click="cancelarEdicion">Cancelar</button>
     </form>
@@ -48,7 +55,7 @@
 </template>
 
 <script>
-import { obtenerDoctores, eliminarDoctores, actualizarDoctor } from './controller/Doctor_controller';
+import { obtenerDoctores, eliminarDoctores, actualizarDoctor, crearDoctor } from './controller/Doctor_controller';
 
 export default {
   name: 'App',
@@ -59,7 +66,14 @@ export default {
         nombre: '',
         apellido: '',
         especialidad: '',
-        ciudad: ''
+        telefono: '',
+        email: '',
+        direccion_Consultorio: '',
+        ciudad: '',
+        nacimiento: '',
+        genero: '',
+        password: '',
+        Número_de_matriculaMedica: ''
       },
       doctorEditando: null,
       filtros: {
@@ -78,10 +92,10 @@ export default {
         const filtroEspecialidad = this.filtros.especialidad.toLowerCase();
         const filtroCiudad = this.filtros.ciudad.toLowerCase();
 
-        const nombreMatch = doctor.nombre.toLowerCase().includes(filtroNombre);
-        const apellidoMatch = doctor.apellido.toLowerCase().includes(filtroApellido);
-        const especialidadMatch = doctor.especialidad.toLowerCase().includes(filtroEspecialidad);
-        const ciudadMatch = doctor.ciudad.toLowerCase().includes(filtroCiudad);
+        const nombreMatch = doctor.nombre ? doctor.nombre.toLowerCase().includes(filtroNombre) : false;
+        const apellidoMatch = doctor.apellido ? doctor.apellido.toLowerCase().includes(filtroApellido) : false;
+        const especialidadMatch = doctor.especialidad ? doctor.especialidad.toLowerCase().includes(filtroEspecialidad) : false;
+        const ciudadMatch = doctor.ciudad ? doctor.ciudad.toLowerCase().includes(filtroCiudad) : false;
 
         return nombreMatch && apellidoMatch && especialidadMatch && ciudadMatch;
       });
@@ -122,7 +136,14 @@ export default {
         nombre: '',
         apellido: '',
         especialidad: '',
-        ciudad: ''
+        telefono: '',
+        email: '',
+        direccion_Consultorio: '',
+        ciudad: '',
+        nacimiento: '',
+        genero: '',
+        password: '',
+        Número_de_matriculaMedica: ''
       };
     },
     async guardarDoctor() {
@@ -130,8 +151,14 @@ export default {
         nombre: this.doctor.nombre,
         apellido: this.doctor.apellido,
         especialidad: this.doctor.especialidad,
-        ciudad: this.doctor.ciudad
-        // Añade otros campos necesarios aquí
+        telefono: this.doctor.telefono,
+        email: this.doctor.email,
+        direccion_Consultorio: this.doctor.direccion_Consultorio,
+        ciudad: this.doctor.ciudad,
+        nacimiento: this.doctor.nacimiento,
+        genero: this.doctor.genero,
+        password: this.doctor.password,
+        Número_de_matriculaMedica: this.doctor.Número_de_matriculaMedica
       };
 
       if (this.doctorEditando) {
@@ -142,7 +169,13 @@ export default {
           this.cancelarEdicion();
         }
       } else {
-        // Lógica para crear un nuevo doctor
+        const { data, error } = await crearDoctor(doctorData);
+        if (data) {
+          this.doctores.push(data);
+          this.cancelarEdicion();
+        } else if (error) {
+          console.error('Error al crear el doctor:', error);
+        }
       }
     },
     resetFilters() {

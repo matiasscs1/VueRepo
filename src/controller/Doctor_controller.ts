@@ -9,6 +9,27 @@ const apiClient = axios.create({
   }
 });
 
+// crear doctores
+
+// Crear doctor
+export const crearDoctor = async (doctor: DoctorModel): Promise<{ data: DoctorModel | null; error: string | null }> => {
+    try {
+        const response = await apiClient.post<DoctorModel>('/doctors', doctor);
+        return { data: response.data, error: null };
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            console.error('Error al crear el doctor:', error.message);
+            return { data: null, error: 'Hubo un error al crear el doctor.' };
+        } else {
+            console.error('Error inesperado:', error);
+            return { data: null, error: 'Hubo un error inesperado.' };
+        }
+    }
+};
+
+
+
+
 export const obtenerDoctores = async (): Promise<{ data: DoctorModel[] | null; error: string | null }> => {
     try {
         const response = await apiClient.get<DoctorModel[]>('/doctors');
@@ -25,16 +46,21 @@ export const obtenerDoctores = async (): Promise<{ data: DoctorModel[] | null; e
     }
 };
 
-export async function eliminarDoctores(email: string): Promise<boolean> {
+// Eliminar doctores por ID
+export async function eliminarDoctores(_id: string): Promise<boolean> {
     try {
-        await apiClient.delete('/doctors', { data: { email } });
-        return true;
+        const response = await apiClient.delete(`/doctors/${_id}`);
+        if (response.status === 200) {
+            console.log('Usuario eliminado correctamente');
+            return true;
+        }
+        return false;
     } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
             if (error.response?.status === 404) {
-                console.log('No se encontró la cédula a eliminar');
+                console.log('Usuario no encontrado');
             } else {
-                console.log('Ocurrió un error al eliminar el paciente:', error.message);
+                console.log('Ocurrió un error al eliminar el usuario:', error.message);
             }
         } else {
             console.log('Error inesperado:', error);
@@ -43,51 +69,9 @@ export async function eliminarDoctores(email: string): Promise<boolean> {
     }
 }
 
-export async function obtenerDoctorPorId(_id: string): Promise<DoctorModel | null> {
-    try {
-        const response = await apiClient.get<DoctorModel>(`/doctors/${_id}`, {
-            headers: {
-                'Cache-Control': 'no-cache',
-            },
-        });
-        return response.data;
-    } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-            console.error('Error al obtener el doctor por ID:', error.message);
-        } else {
-            console.error('Error inesperado:', error);
-        }
-        return null;
-    }
-}
 
-export const mesRegistroDoctores = async (): Promise<number[] | null> => {
-    try {
-        const { data, error } = await obtenerDoctores();
-        if (error) {
-            console.error('Error al obtener los doctores:', error);
-            return null;
-        }
-        
-        const mesRegistroArray = Array.from({ length: 12 }, () => 0);
-        
-        if (data) {
-            data.forEach((doctor: DoctorModel) => {
-                const fechaRegistro = new Date(doctor.Fecha_de_Registro);
-                const mesRegistro = fechaRegistro.getMonth();
-                mesRegistroArray[mesRegistro] += 1;
-            });
-        }
-        return mesRegistroArray;
-    } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-            console.error('Error al obtener los doctores:', error.message);
-        } else {
-            console.error('Error inesperado:', error);
-        }
-        return null;
-    }
-}
+
+
 
 export async function actualizarDoctor(doctor: DoctorModel, _id: string): Promise<boolean> {
     try {
@@ -107,38 +91,4 @@ export async function actualizarDoctor(doctor: DoctorModel, _id: string): Promis
     }
 }
 
-export async function diagnostico(_id: string): Promise<boolean> {
-    try {
-        await apiClient.post(`/diagnosticado/${_id}`);
-        return true;
-    } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-            if (error.response?.status === 404 || error.response?.status === 500) {
-                console.log('Datos ya registrados en el sistema, no se puede repetir');
-            } else {
-                console.log('Ocurrió un error al registrar el diagnóstico:', error.message);
-            }
-        } else {
-            console.log('Error inesperado:', error);
-        }
-        return false;
-    }
-}
 
-export async function guardarReceta(_id: string): Promise<boolean> {
-    try {
-        await apiClient.get(`/receta/${_id}`);
-        return true;
-    } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-            if (error.response?.status === 404 || error.response?.status === 500) {
-                console.log('Datos ya registrados en el sistema, no se puede repetir');
-            } else {
-                console.log('Ocurrió un error al guardar la receta:', error.message);
-            }
-        } else {
-            console.log('Error inesperado:', error);
-        }
-        return false;
-    }
-}
